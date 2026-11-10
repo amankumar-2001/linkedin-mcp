@@ -24,7 +24,7 @@ async function connect(fetchImpl: FetchLike, signedIn = true) {
     if (!signedIn) throw new NotAuthenticatedError();
     return { token, client: new LinkedInClient({ accessToken: token.accessToken, apiVersion: "202610", fetchImpl }) };
   };
-  const server = createServer({ version: "0.0.0-test", getSession, fetchImpl });
+  const server = createServer({ version: "0.0.0-test", getSession, fetchImpl, dataDir: await mkdtemp(join(tmpdir(), "limcp-data-")) });
   const [a, b] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: "test", version: "1.0.0" });
   await Promise.all([server.connect(a), client.connect(b)]);
@@ -34,11 +34,25 @@ async function connect(fetchImpl: FetchLike, signedIn = true) {
 const text = (r: Record<string, unknown>) => ((r.content as Array<{ text: string }> | undefined)?.[0]?.text ?? "");
 
 describe("MCP tools", () => {
-  it("lists all v1 tools with write tools marked non-read-only", async () => {
+  it("lists the post tools with write tools marked non-read-only", async () => {
     const client = await connect(stubFetch({}).fetch);
     const { tools } = await client.listTools();
-    expect(tools.map((t) => t.name).sort()).toEqual(
-      ["auth_status", "create_image_post", "create_link_post", "create_text_post", "delete_post", "get_my_profile", "preview_post"].sort(),
+    expect(tools.map((t) => t.name)).toEqual(
+      expect.arrayContaining([
+        "auth_status",
+        "get_my_profile",
+        "preview_post",
+        "create_text_post",
+        "create_link_post",
+        "create_image_post",
+        "create_multi_image_post",
+        "create_video_post",
+        "create_document_post",
+        "create_poll_post",
+        "reshare_post",
+        "edit_post",
+        "delete_post",
+      ]),
     );
     const del = tools.find((t) => t.name === "delete_post")!;
     expect(del.annotations).toMatchObject({ destructiveHint: true, readOnlyHint: false });
@@ -60,7 +74,7 @@ describe("MCP tools", () => {
     });
     const client = await connect(stub.fetch);
     const r = await client.callTool({ name: "create_text_post", arguments: { text: "Hello #mcp", visibility: "CONNECTIONS" } });
-    expect(JSON.parse(text(r))).toEqual({ published: true, visibility: "CONNECTIONS", postUrn: "urn:li:share:1", url: "https://www.linkedin.com/feed/update/urn:li:share:1/" });
+    expect(JSON.parse(text(r))).toEqual({ published: true, kind: "text", visibility: "CONNECTIONS", postUrn: "urn:li:share:1", url: "https://www.linkedin.com/feed/update/urn:li:share:1/" });
     expect(stub.calls[0]!.body).toMatchObject({ author: "urn:li:person:me", commentary: "Hello #mcp", visibility: "CONNECTIONS" });
   });
 

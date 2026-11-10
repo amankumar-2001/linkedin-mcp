@@ -41,7 +41,7 @@ async function main(argv: string[]): Promise<number> {
 
   switch (cmd) {
     case "serve": {
-      const server = createServer({ version: VERSION, getSession: createSessionLoader(config) });
+      const server = createServer({ version: VERSION, getSession: createSessionLoader(config), dataDir: config.home });
       await server.connect(new StdioServerTransport());
       console.error(`linkedin-mcp ${VERSION} running on stdio`);
       return -1; // keep running

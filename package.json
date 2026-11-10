@@ -1,7 +1,7 @@
 {
   "name": "@amankumar-2001/linkedin-mcp",
-  "version": "0.1.0",
-  "description": "MCP server for LinkedIn: read your profile and publish text, link and image posts from Claude or any MCP client.",
+  "version": "0.2.0",
+  "description": "MCP server for LinkedIn: publish text, link, image, video, document and poll posts, keep drafts, search jobs, and read your full profile from your data export.",
   "license": "MIT",
   "author": "Aman Kumar (https://github.com/amankumar-2001)",
   "homepage": "https://github.com/amankumar-2001/linkedin-mcp#readme",
@@ -41,6 +41,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
+    "fflate": "^0.8.3",
     "zod": "^4.1.0"
   },
   "devDependencies": {

@@ -54,14 +54,15 @@ export class LinkedInClient {
     return res;
   }
 
-  /** Uploads raw bytes to a pre-signed LinkedIn upload URL. */
-  async uploadBytes(uploadUrl: string, bytes: Uint8Array, contentType: string): Promise<void> {
+  /** Uploads raw bytes to a pre-signed LinkedIn upload URL. Returns the response so callers can read the ETag. */
+  async uploadBytes(uploadUrl: string, bytes: Uint8Array, contentType: string, extraHeaders: Record<string, string> = {}): Promise<Response> {
     const res = await this.fetchImpl(uploadUrl, {
       method: "PUT",
-      headers: { Authorization: `Bearer ${this.opts.accessToken}`, "Content-Type": contentType },
+      headers: { Authorization: `Bearer ${this.opts.accessToken}`, "Content-Type": contentType, ...extraHeaders },
       body: bytes,
     });
     await ensureOk(res);
+    return res;
   }
 }
 

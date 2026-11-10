@@ -1,24 +1,54 @@
 # linkedin-mcp
 
-An [MCP](https://modelcontextprotocol.io) server for **your own LinkedIn account**. Connect it to Claude (or any MCP client) to read your profile and publish text, link and image posts — using LinkedIn's official API.
+An [MCP](https://modelcontextprotocol.io) server for **your own LinkedIn account**. Connect it to Claude (or any MCP client) to publish every kind of post LinkedIn's API allows, keep drafts, search for jobs, and read your full profile from your LinkedIn data export.
 
 - **Bring your own LinkedIn app.** You create a free developer app; nobody else ever sees your credentials.
-- **Your token stays on your machine** in `~/.config/linkedin-mcp/token.json` (permissions `0600`).
+- **Everything stays on your machine** — token, drafts and caches live in `~/.config/linkedin-mcp/` (files are `0600`).
 - **Nothing is posted without you.** Write tools are marked as such, so MCP clients ask before running them, and `preview_post` shows the exact payload first.
+- **No scraping.** It uses LinkedIn's official API, public job-board APIs, and the export file LinkedIn gives you.
 
-## Tools
+## Tools (21)
+
+**Account**
 
 | Tool | What it does |
 |---|---|
 | `auth_status` | Connected account, granted scopes, days until the token expires |
-| `get_my_profile` | Your id, name, photo, email and locale |
-| `preview_post` | Shows exactly what would be sent for a text, link or image post — publishes nothing |
-| `create_text_post` | Publish a text post (`PUBLIC` or `CONNECTIONS`) |
-| `create_link_post` | Publish a post with a link card (title, description, optional thumbnail) |
-| `create_image_post` | Upload a PNG/JPEG/GIF (local file or https URL) and publish it |
-| `delete_post` | Delete one of your posts by URN |
+| `get_my_profile` | Your id, name, photo, email and locale (all LinkedIn's API shares) |
+| `read_linkedin_export` | Your **full profile** — headline, summary, positions, education, skills, certifications, projects, languages, honors, courses, recommendations, connections summary — read locally from LinkedIn's data export |
 
-> **What it can't do:** LinkedIn only lets approved partners edit profile sections (headline, About, experience, skills) or read your feed, messages and connections. This server sticks to what LinkedIn allows for self-serve apps, and does not scrape or automate the website.
+**Posting** — all accept `visibility` (`PUBLIC` / `CONNECTIONS`), `#hashtags` and `@[Name](urn:li:person:…)` mentions
+
+| Tool | What it does |
+|---|---|
+| `preview_post` | Shows exactly what would be sent for any post kind — publishes and uploads nothing |
+| `create_text_post` | Text post (up to 3,000 characters) |
+| `create_link_post` | Link card with title, description and optional thumbnail |
+| `create_image_post` | One PNG/JPEG/GIF (local file or https URL) |
+| `create_multi_image_post` | 2–20 images in one post |
+| `create_video_post` | MP4, 3 s–30 min, up to 500 MB (multipart upload, waits for processing) |
+| `create_document_post` | PDF/PPT/PPTX/DOC/DOCX shown as a swipeable carousel (≤100 MB, ≤300 pages) |
+| `create_poll_post` | Poll with 2–4 options, open 1/3/7/14 days |
+| `reshare_post` | Reshare a post (URN or linkedin.com link) with your own text |
+| `edit_post` | Change the text of one of your posts |
+| `delete_post` | Delete one of your posts |
+
+**Drafts** (local, in `drafts.json`)
+
+| Tool | What it does |
+|---|---|
+| `save_draft` / `update_draft` / `delete_draft` | Keep any kind of post as a draft and refine it |
+| `list_drafts` | Your drafts, newest first |
+| `publish_draft` | Publish a draft exactly as saved (once, unless you allow a repost) |
+
+**Jobs** (no LinkedIn API exists for this; see [Jobs](#jobs))
+
+| Tool | What it does |
+|---|---|
+| `linkedin_job_search_link` | A filtered LinkedIn Jobs search URL (keywords, location, date posted, remote/hybrid/on-site, experience level, job type, Easy Apply) |
+| `search_public_jobs` | Real listings from company job boards (Greenhouse, Lever, Ashby) and remote jobs from Remotive |
+
+> **What it can't do:** LinkedIn only lets approved partners edit profile sections (headline, About, experience, skills), read your feed, messages or connections, search jobs, or comment/react. This server sticks to what LinkedIn allows for self-serve apps and does not scrape or automate the website.
 
 ## Setup
 
@@ -84,9 +114,31 @@ Then try: *"What's my LinkedIn auth status?"* or *"Draft a LinkedIn post announc
 
 CLI: `linkedin-mcp [serve|auth|status|logout|--help|--version]`.
 
+## Jobs
+
+LinkedIn has no job-search API for members, so jobs come from two legitimate places:
+
+- **`linkedin_job_search_link`** builds the same URL LinkedIn's own filters produce, e.g. *"backend engineer, Bengaluru, past week, remote or hybrid"*. Open it while signed in.
+- **`search_public_jobs`** calls public job-board APIs that companies publish:
+  - **Greenhouse, Lever, Ashby** — pass company board slugs, e.g. `["stripe", "lever:plaid", "ashby:notion"]`. A bare slug is tried on all three. The slug is the name in the company's careers URL (`boards.greenhouse.io/stripe`, `jobs.lever.co/plaid`, `jobs.ashbyhq.com/notion`).
+  - **Remotive** — add `"remotive"` to `sources` for remote roles. Remotive's feed is delayed 24 h and asks for at most ~4 requests a day, so results are cached for 6 hours; always credit Remotive and link to its listing.
+
+Keywords must all appear in the job title, department or tags; `location` matches the job's location text, or use `"remote"`.
+
+## Full profile from your LinkedIn export
+
+1. LinkedIn → **Settings → Data privacy → Get a copy of your data**. Pick *"Download larger data archive"* (or at least Profile, Positions, Education, Skills, Connections) and request it.
+2. LinkedIn emails a link (usually within minutes for the basic archive, up to 24 h for the full one). Download the ZIP.
+3. Ask: *"Read my LinkedIn export at ~/Downloads/Basic_LinkedInDataExport_….zip"*.
+
+The file is read locally and never uploaded. Address, birth date and similar fields are never returned, and connection names are only included if you pass `include_connections: true`.
+
 ## Notes
 
 - **Link posts:** LinkedIn's API doesn't fetch page previews, so you supply the card `title` (and optionally `description` and a thumbnail).
+- **Mentions:** write `@[Bloom Health](urn:li:organization:123)` or `@[Name](urn:li:person:abc)`. The display text must match the name on LinkedIn. There's no API to look up someone's URN, so you need to know it.
+- **Videos/documents** are uploaded, then the server waits (up to 5 minutes) for LinkedIn to finish processing before posting. If processing takes longer, nothing is posted and you can retry.
+- **Edit/delete** need the post URN returned when the post was created (`urn:li:share:…`); feed links contain an activity id, which works for resharing only.
 - **Formatting:** post text is escaped for LinkedIn's "little" text format, so characters like `(`, `[`, `@` and `*` appear literally instead of truncating your post. `#hashtags` stay clickable.
 - **Rate limits:** LinkedIn applies daily per-member limits; a 429 error includes the retry delay when LinkedIn sends one.
 - Follow LinkedIn's [API Terms of Use](https://www.linkedin.com/legal/l/api-terms-of-use) and [Professional Community Policies](https://www.linkedin.com/legal/professional-community-policies) — you're responsible for what you post.
