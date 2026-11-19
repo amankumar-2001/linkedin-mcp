@@ -31,7 +31,7 @@ export function registerPostTools(server: McpServer, getSession: SessionLoader, 
       description:
         "Shows exactly what would be sent to LinkedIn for any post kind (text, link, image, images, video, document, poll, reshare) without publishing or uploading anything. Use it to show the user the post before creating it.",
       inputSchema: anyPostShape,
-      annotations: { readOnlyHint: true, openWorldHint: false },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     safe(async (a) => {
       const { token } = await getSession();

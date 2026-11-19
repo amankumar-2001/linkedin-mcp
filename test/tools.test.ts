@@ -57,6 +57,11 @@ describe("MCP tools", () => {
     const del = tools.find((t) => t.name === "delete_post")!;
     expect(del.annotations).toMatchObject({ destructiveHint: true, readOnlyHint: false });
     expect(tools.find((t) => t.name === "preview_post")!.annotations?.readOnlyHint).toBe(true);
+    for (const t of tools) {
+      for (const hint of ["readOnlyHint", "destructiveHint", "idempotentHint", "openWorldHint"] as const) {
+        expect(typeof t.annotations?.[hint], `${t.name}.${hint}`).toBe("boolean");
+      }
+    }
   });
 
   it("preview_post never calls LinkedIn", async () => {

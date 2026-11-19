@@ -21,7 +21,7 @@ export function registerExportTools(server: McpServer): void {
         sections: z.array(z.enum(SECTIONS)).optional().describe("Only return these sections (default: all found)."),
         include_connections: z.boolean().default(false).describe("Also return the full list of connections (names, companies). Off by default for privacy."),
       },
-      annotations: { readOnlyHint: true, openWorldHint: false },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     safe(async (a) => ok({ ...(await readLinkedInExport(expand(a.path), { sections: a.sections, includeConnections: a.include_connections })) })),
   );

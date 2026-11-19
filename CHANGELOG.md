@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1 — 2026-11-19
+
+- Every tool now declares all four MCP hints (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`); read-only tools were missing two. A test checks this.
+- Agent skill in `skill/linkedin-mcp/` (`SKILL.md` + tool reference) that teaches agents to set up and use this server with a confirm-before-posting workflow. `npm run pack:skill` builds `linkedin-mcp-skill.zip`.
+
 ## 0.2.0 — 2026-11-10
 
 - New post types: `create_multi_image_post` (2–20 images), `create_video_post` (MP4 multipart upload with processing wait), `create_document_post` (PDF/PPT/DOC carousels), `create_poll_post`.

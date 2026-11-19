@@ -26,7 +26,7 @@ export function registerJobTools(server: McpServer, opts: { cacheDir: string; fe
         easy_apply: z.boolean().default(false),
         sort: z.enum(["relevant", "recent"]).default("recent"),
       },
-      annotations: { readOnlyHint: true, openWorldHint: false },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     safe(async (a) => ok({ url: buildJobSearchUrl(a), note: "Open this link in your browser while signed in to LinkedIn." })),
   );
@@ -47,7 +47,7 @@ export function registerJobTools(server: McpServer, opts: { cacheDir: string; fe
         sources: z.array(z.enum(["boards", "remotive"])).default(["boards"]).describe('"boards" = the companies you listed; "remotive" = remote jobs from Remotive (cached 6h).'),
         limit: z.number().int().min(1).max(100).default(25),
       },
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     },
     safe(async (a) => {
       const wantBoards = a.sources.includes("boards");

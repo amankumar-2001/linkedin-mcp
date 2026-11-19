@@ -44,7 +44,7 @@ export function registerDraftTools(server: McpServer, store: DraftStore, getSess
       title: "List post drafts",
       description: "Lists your local post drafts, newest first. Published drafts are hidden unless include_published is true.",
       inputSchema: { include_published: z.boolean().default(false), with_details: z.boolean().default(false).describe("Include each draft's full post fields.") },
-      annotations: { readOnlyHint: true, openWorldHint: false },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     safe(async (a) => {
       const drafts = await store.list({ includePublished: a.include_published });

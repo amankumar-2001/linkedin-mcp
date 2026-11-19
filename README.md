@@ -103,6 +103,16 @@ The server itself only needs the saved token; the client ID/secret are used only
 
 Then try: *"What's my LinkedIn auth status?"* or *"Draft a LinkedIn post announcing my new project and show me a preview."*
 
+### 4. (Optional) Add the agent skill
+
+[`skill/linkedin-mcp/SKILL.md`](skill/linkedin-mcp/SKILL.md) teaches your agent the setup steps, which tool fits which post, LinkedIn's limits, and to always preview and ask before posting. In Claude Code, copy the folder into `~/.claude/skills/`:
+
+```bash
+cp -r skill/linkedin-mcp ~/.claude/skills/
+```
+
+`npm run pack:skill` builds `linkedin-mcp-skill.zip` for skill marketplaces.
+
 ## Configuration
 
 | Variable | Default | Purpose |

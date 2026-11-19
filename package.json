@@ -1,6 +1,6 @@
 {
   "name": "@amankumar-2001/linkedin-mcp",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "MCP server for LinkedIn: publish text, link, image, video, document and poll posts, keep drafts, search jobs, and read your full profile from your data export.",
   "license": "MIT",
   "author": "Aman Kumar (https://github.com/amankumar-2001)",
@@ -37,7 +37,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "inspect": "npx -y @modelcontextprotocol/inspector node dist/index.js"
+    "inspect": "npx -y @modelcontextprotocol/inspector node dist/index.js",
+    "pack:skill": "node scripts/pack-skill.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
