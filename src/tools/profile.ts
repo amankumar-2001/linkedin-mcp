@@ -10,7 +10,7 @@ export function registerProfileTools(server: McpServer, getSession: SessionLoade
       title: "LinkedIn sign-in status",
       description: "Shows which LinkedIn account is connected, the granted scopes, and how many days until the token expires.",
       inputSchema: {},
-      annotations: { readOnlyHint: true, openWorldHint: false },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     },
     safe(async () => {
       const { token } = await getSession();
@@ -32,7 +32,7 @@ export function registerProfileTools(server: McpServer, getSession: SessionLoade
       title: "Get my LinkedIn profile",
       description: "Returns the signed-in member's basic profile from LinkedIn: id, name, profile picture, email and locale.",
       inputSchema: {},
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
     },
     safe(async () => {
       const { client, token } = await getSession();
